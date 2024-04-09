@@ -6,6 +6,14 @@ resource "aws_instance" "MyIMG" {
     Name = "Testing Machine"
   }
 }
+resource "aws_instance" "MyIMG2" {
+  ami           = "ami-09298640a92b2d12c"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "Testing Machine2"
+  }
+}
 resource "aws_vpc" "main" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "default"
