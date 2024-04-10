@@ -31,6 +31,11 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
+resource "aws_vpc_attachment" "igw_attach" {
+  vpc_id = aws_vpc.main.id
+  internet_gateway_id = aws_internet_gateway.gw.id
+}
+
 resource "aws_route_table" "example" {
   vpc_id = aws_vpc.main.id
 
@@ -44,12 +49,7 @@ resource "aws_route_table" "example" {
   }
 }
 
-resource "aws_vpc_attachment" "igw_attach" {
-  vpc_id = aws_vpc.main.id
-  internet_gateway_id = aws_internet_gateway.gw.id
-}
-
-resource "aws_instance" "MyIMG1" {
+resource "aws_instance" "public_server" {
   ami           = "ami-09298640a92b2d12c"
   instance_type = "t2.micro"
 
@@ -59,7 +59,8 @@ resource "aws_instance" "MyIMG1" {
   security_groups = [aws_security_group.allow_all.name]
   }
 }
-resource "aws_instance" "MyIMG2" {
+
+resource "aws_instance" "private_server" {
   ami           = "ami-09298640a92b2d12c"
   instance_type = "t2.micro"
 
@@ -67,28 +68,5 @@ resource "aws_instance" "MyIMG2" {
     Name = "Testing Machine2"
 	subnet_id = aws_subnet.private.id
   security_groups = [aws_security_group.allow_all.name]
-  }
-}
-
-resource "aws_nat_gateway" "nat" {
-  connectivity_type = "private"
-  subnet_id         = aws_subnet.private.id
-	tags= {
-	  Name = "Private Connection"
-  }
-}
-
-resource "aws_vpc_endpoint_subnet_association" "sn_ec2" {
-  vpc_endpoint_id = aws_vpc_endpoint.ec2.id
-  subnet_id       = aws_subnet.sn.id
-}
-
-resource "aws_security_group" "allow_all" {
-  vpc_id = aws_vpc.main.id
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 }
