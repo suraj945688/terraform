@@ -68,14 +68,6 @@ resource "aws_route_table" "example" {
   }
 }
 
-resource "aws_nat_gateway" "nat" {
-  connectivity_type = "private"
-  subnet_id         = aws_subnet.private.id
-	tags= {
-	  Name = "Private Connection"
-  }
-}
-
 resource "aws_vpc_endpoint_subnet_association" "sn_ec2" {
   vpc_endpoint_id = aws_vpc_endpoint.ec2.id
   subnet_id       = aws_subnet.sn.id
