@@ -1,23 +1,3 @@
-resource "aws_instance" "MyIMG1" {
-  ami           = "ami-09298640a92b2d12c"
-  instance_type = "t2.micro"
-
-  tags = {
-    Name = "Testing Machine1"
-	subnet_id = aws_subnet.public.id
-  security_groups = [aws_security_group.allow_all.name]
-  }
-}
-resource "aws_instance" "MyIMG2" {
-  ami           = "ami-09298640a92b2d12c"
-  instance_type = "t2.micro"
-
-  tags = {
-    Name = "Testing Machine2"
-	subnet_id = aws_subnet.private.id
-  security_groups = [aws_security_group.allow_all.name]
-  }
-}
 resource "aws_vpc" "main" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "default"
@@ -26,6 +6,7 @@ resource "aws_vpc" "main" {
     Name = "Terraform_VPC"
   }
 }
+
 resource "aws_subnet" "private" {
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.0.1.0/24"
@@ -50,11 +31,6 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-resource "aws_vpc_attachment" "igw_attach" {
-  vpc_id = aws_vpc.main.id
-  internet_gateway_id = aws_internet_gateway.gw.id
-}
-
 resource "aws_route_table" "example" {
   vpc_id = aws_vpc.main.id
 
@@ -65,6 +41,40 @@ resource "aws_route_table" "example" {
 
   tags = {
     Name = "example"
+  }
+}
+
+resource "aws_vpc_attachment" "igw_attach" {
+  vpc_id = aws_vpc.main.id
+  internet_gateway_id = aws_internet_gateway.gw.id
+}
+
+resource "aws_instance" "MyIMG1" {
+  ami           = "ami-09298640a92b2d12c"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "Testing Machine1"
+	subnet_id = aws_subnet.public.id
+  security_groups = [aws_security_group.allow_all.name]
+  }
+}
+resource "aws_instance" "MyIMG2" {
+  ami           = "ami-09298640a92b2d12c"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "Testing Machine2"
+	subnet_id = aws_subnet.private.id
+  security_groups = [aws_security_group.allow_all.name]
+  }
+}
+
+resource "aws_nat_gateway" "nat" {
+  connectivity_type = "private"
+  subnet_id         = aws_subnet.private.id
+	tags= {
+	  Name = "Private Connection"
   }
 }
 
