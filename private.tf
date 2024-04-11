@@ -23,6 +23,17 @@ resource "aws_subnet" "public" {
     Name = "Public_Subnet"
   }
 }
+
+resource "aws_security_group" "allow_all" {
+  vpc_id = aws_vpc.main.id
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
 
@@ -47,6 +58,16 @@ resource "aws_route_table" "example" {
   tags = {
     Name = "example"
   }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.private.id
+  route_table_id = aws_route_table.example.id
+}
+
+resource "aws_route_table_association" "private" {
+  gateway_id     = aws_internet_gateway.public.id
+  route_table_id = aws_route_table.example.id
 }
 
 resource "aws_instance" "public_server" {
