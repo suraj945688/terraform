@@ -47,7 +47,7 @@ resource "aws_vpc_attachment" "igw_attach" {
   internet_gateway_id = aws_internet_gateway.gw.id
 }
 
-resource "aws_route_table" "example" {
+resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   route {
@@ -60,14 +60,35 @@ resource "aws_route_table" "example" {
   }
 }
 
+resource "aws_route_table" "private" {
+  subnet_id = aws_subnet.private.id
+
+  route {
+    gateway_id = aws_subnet.natgw.id
+  }
+}
+
+  tags = {
+    Name = "example"
+  }
+}
 resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.private.id
+  subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.example.id
 }
 
+resource "aws_nat_gateway" "natgw" {
+  allocation_id = aws_eip.natgw.id
+  subnet_id     = aws_subnet.natgw.id
+
+  tags = {
+    Name = "NAT GW"
+  }
+}
+
 resource "aws_route_table_association" "private" {
-  gateway_id     = aws_internet_gateway.public.id
-  route_table_id = aws_route_table.example.id
+  gateway_id     = aws_nat_gateway.private.id
+  route_table_id = aws_route_table.natgw.id
 }
 
 resource "aws_instance" "public_server" {
